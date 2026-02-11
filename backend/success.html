@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Authentication Success - Stitchera</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        max-width: 600px;
+        width: 100%;
+        text-align: center;
+      }
+
+      .success-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+        animation: bounce 1s ease-in-out;
+      }
+
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-20px);
+        }
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 32px;
+      }
+
+      .subtitle {
+        color: #666;
+        margin-bottom: 30px;
+        font-size: 16px;
+      }
+
+      .user-card {
+        background: #f8f9fa;
+        padding: 30px;
+        border-radius: 15px;
+        margin: 20px 0;
+      }
+
+      .user-card img {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        margin-bottom: 15px;
+        border: 4px solid #667eea;
+      }
+
+      .user-card h2 {
+        color: #333;
+        margin-bottom: 5px;
+        font-size: 24px;
+      }
+
+      .user-card p {
+        color: #666;
+        font-size: 14px;
+        margin-bottom: 20px;
+      }
+
+      .info-section {
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 15px;
+        text-align: left;
+      }
+
+      .info-section h3 {
+        color: #667eea;
+        font-size: 14px;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .token-display {
+        background: #f1f3f4;
+        padding: 15px;
+        border-radius: 8px;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        word-break: break-all;
+        color: #333;
+        max-height: 100px;
+        overflow-y: auto;
+      }
+
+      .user-data {
+        background: #f1f3f4;
+        padding: 15px;
+        border-radius: 8px;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        color: #333;
+        text-align: left;
+        white-space: pre-wrap;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 12px 30px;
+        margin: 10px 5px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary {
+        background: #667eea;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #5568d3;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-secondary {
+        background: #f1f3f4;
+        color: #333;
+      }
+
+      .btn-secondary:hover {
+        background: #e8eaed;
+      }
+
+      .instructions {
+        background: #e7f3ff;
+        border-left: 4px solid #2196f3;
+        padding: 15px;
+        margin-top: 20px;
+        text-align: left;
+        border-radius: 5px;
+      }
+
+      .instructions h3 {
+        color: #2196f3;
+        font-size: 16px;
+        margin-bottom: 10px;
+      }
+
+      .instructions p {
+        color: #333;
+        font-size: 14px;
+        line-height: 1.6;
+        margin-bottom: 8px;
+      }
+
+      .instructions code {
+        background: #fff;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        color: #d63384;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="success-icon">✅</div>
+      <h1>Authentication Successful!</h1>
+      <p class="subtitle">You've successfully logged in with Google</p>
+
+      <div class="user-card" id="userCard">
+        <div id="loading">Loading user data...</div>
+      </div>
+
+      <div class="instructions">
+        <h3>🎯 How to Use This Token in Your Frontend</h3>
+        <p><strong>1. Save the token to localStorage:</strong></p>
+        <p><code>localStorage.setItem('authToken', token);</code></p>
+        <p><strong>2. Make API calls with the token:</strong></p>
+        <p>
+          <code
+            >fetch('/api/profile', { headers: { 'Authorization': `Bearer
+            ${token}` } })</code
+          >
+        </p>
+        <p><strong>3. The token expires in 7 days</strong></p>
+      </div>
+
+      <div style="margin-top: 20px">
+        <button class="btn btn-primary" onclick="testProtectedRoute()">
+          Test Protected API
+        </button>
+        <button class="btn btn-secondary" onclick="copyToken()">
+          Copy Token
+        </button>
+        <a href="/auth/test" class="btn btn-secondary">Back to Login</a>
+      </div>
+
+      <div id="apiResult" style="display: none; margin-top: 20px">
+        <div class="info-section">
+          <h3>API Response</h3>
+          <div class="user-data" id="apiData"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let token = "";
+      let userData = {};
+
+      window.onload = function () {
+        const params = new URLSearchParams(window.location.search);
+        token = params.get("token");
+        const userParam = params.get("user");
+
+        if (token && userParam) {
+          try {
+            userData = JSON.parse(decodeURIComponent(userParam));
+            displayUserInfo();
+          } catch (error) {
+            document.getElementById("userCard").innerHTML =
+              '<p style="color: red;">Error parsing user data: ' +
+              error.message +
+              "</p>";
+          }
+        } else {
+          document.getElementById("userCard").innerHTML =
+            '<p style="color: red;">No authentication data found. Please login again.</p>';
+        }
+      };
+
+      function displayUserInfo() {
+        const userCard = document.getElementById("userCard");
+        userCard.innerHTML = `
+                <img src="${userData.picture}" alt="${userData.name}">
+                <h2>${userData.name}</h2>
+                <p>${userData.email}</p>
+                
+                <div class="info-section">
+                    <h3>JWT Token (First 100 chars)</h3>
+                    <div class="token-display">${token.substring(0, 100)}...</div>
+                </div>
+                
+                <div class="info-section">
+                    <h3>User Data</h3>
+                    <div class="user-data">${JSON.stringify(userData, null, 2)}</div>
+                </div>
+            `;
+      }
+
+      async function testProtectedRoute() {
+        const resultDiv = document.getElementById("apiResult");
+        const dataDiv = document.getElementById("apiData");
+
+        try {
+          const response = await fetch("http://localhost:5000/api/profile", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          const data = await response.json();
+          resultDiv.style.display = "block";
+          dataDiv.textContent = JSON.stringify(data, null, 2);
+
+          if (!response.ok) {
+            dataDiv.style.color = "red";
+          }
+        } catch (error) {
+          resultDiv.style.display = "block";
+          dataDiv.textContent = `Error: ${error.message}`;
+          dataDiv.style.color = "red";
+        }
+      }
+
+      function copyToken() {
+        navigator.clipboard
+          .writeText(token)
+          .then(() => {
+            alert("Token copied to clipboard!");
+          })
+          .catch((err) => {
+            alert("Failed to copy token: " + err);
+          });
+      }
+    </script>
+  </body>
+</html>
