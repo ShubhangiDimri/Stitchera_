@@ -1,0 +1,134 @@
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://johndoe:randompassword@localhost:5432/mydb"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+enum Role {
+  CUSTOMER
+  TAILOR
+  DELIVERY
+  ADMIN
+}
+
+enum OrderStatus {
+  CART
+  PLACED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum PaymentMethod {
+  UPI
+  COD
+}
+
+enum SubscriptionPlan {
+  FREE
+  KARIGAR
+  USTAD
+  MEHER
+  SHAHI
+}
+
+enum AIFeature {
+  BODY_TYPE
+  MATCHING
+}
+
+model User {
+  id               String           @id @default(cuid())
+  name             String
+  email            String           @unique
+  password         String?
+  role             Role             @default(CUSTOMER)
+  subscriptionPlan SubscriptionPlan @default(FREE)
+  freeBookingsUsed Int              @default(0)
+  referralCode     String?
+  createdAt        DateTime         @default(now())
+
+  tailorProfile    TailorProfile?
+  deliveryProfile  DeliveryProfile?
+  orders           Order[]          @relation("CustomerOrders")
+  reviews          Review[]
+  subscriptions    Subscription[]
+  aiUsage          AIUsage[]
+}
+
+model TailorProfile {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  serviceCategories String[]
+  pricing           Json
+  location          String
+  upiId             String
+  rating            Float    @default(0)
+  reviewsCount      Int      @default(0)
+
+  user              User     @relation(fields: [userId], references: [id])
+  orders            Order[]  @relation("TailorOrders")
+}
+
+model DeliveryProfile {
+  id           String  @id @default(cuid())
+  userId       String  @unique
+  vehicleType  String
+  upiId        String
+  activeStatus Boolean @default(true)
+
+  user         User    @relation(fields: [userId], references: [id])
+  orders       Order[] @relation("DeliveryOrders")
+}
+
+model Order {
+  id                String        @id @default(cuid())
+  customerId        String
+  tailorId          String
+  deliveryPartnerId String?
+  servicePrice      Float
+  handlingCharge    Float         @default(18)
+  surgeCharge       Float         @default(0)
+  deliveryCharge    Float
+  commission        Float
+  status            OrderStatus   @default(CART)
+  paymentMethod     PaymentMethod
+  createdAt         DateTime      @default(now())
+
+  customer          User          @relation("CustomerOrders", fields: [customerId], references: [id])
+  tailor            TailorProfile @relation("TailorOrders", fields: [tailorId], references: [id])
+  deliveryPartner   DeliveryProfile? @relation("DeliveryOrders", fields: [deliveryPartnerId], references: [id])
+  reviews           Review[]
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  orderId    String
+  reviewerId String
+  rating     Int
+  comment    String?
+
+  order      Order    @relation(fields: [orderId], references: [id])
+  reviewer   User     @relation(fields: [reviewerId], references: [id])
+}
+
+model Subscription {
+  id        String           @id @default(cuid())
+  userId    String
+  planName  SubscriptionPlan
+  active    Boolean          @default(true)
+  startDate DateTime         @default(now())
+  endDate   DateTime
+
+  user      User             @relation(fields: [userId], references: [id])
+}
+
+model AIUsage {
+  id         String    @id @default(cuid())
+  userId     String
+  feature    AIFeature
+  usageCount Int       @default(0)
+
+  user       User      @relation(fields: [userId], references: [id])
+}
